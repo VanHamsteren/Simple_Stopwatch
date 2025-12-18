@@ -20,6 +20,10 @@
                 <button id="lap">Lap</button>
             </div>
         </section>
+        <section id="list">
+            <ol id="laps">
+            </ol>
+        </section>
     </main>
 </body>
 <script>
@@ -42,10 +46,14 @@
         const S = totalSeconds % 60;
         const CS = Math.floor((ms % 1000) / 10);
 
-        tStatus.innerHTML =
+        const tText =
             `${String(M).padStart(2, '0')}:` +
             `${String(S).padStart(2, '0')}:` +
             `${String(CS).padStart(2, '0')}`;
+
+        tStatus.innerHTML = tText;
+
+        return tText;
     }
 
     function timerStart() {
@@ -75,10 +83,18 @@
         tRunning = false;
         tElapsed = 0;
         tStatus.innerHTML = '00:00:00';
+        const l = document.getElementById('laps');
+        l.innerHTML = '';
     }
 
     function timerLap() {
-
+        if (tRunning) {
+            const t = tUpdate(tElapsed);
+            const l = document.getElementById('laps');
+            const li = document.createElement('li');
+            li.appendChild(document.createTextNode(t));
+            l.appendChild(li);
+        }
     }
 
     // ADD LISTENERS
