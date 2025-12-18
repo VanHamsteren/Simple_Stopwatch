@@ -22,4 +22,71 @@
         </section>
     </main>
 </body>
+<script>
+    // GET ELEMENTS
+    const tStatus = document.getElementById('timer');
+    const tStart = document.getElementById('start');
+    const tStop = document.getElementById('stop');
+    const tReset = document.getElementById('reset');
+    const tLap = document.getElementById('lap');
+
+    // SET VARS
+    let tRunning = false;
+    let tInterval;
+    let tElapsed = 0;
+
+    // TIMER CONTROL
+    function tUpdate(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const M = Math.floor(totalSeconds / 60);
+        const S = totalSeconds % 60;
+        const CS = Math.floor((ms % 1000) / 10);
+
+        tStatus.innerHTML =
+            `${String(M).padStart(2, '0')}:` +
+            `${String(S).padStart(2, '0')}:` +
+            `${String(CS).padStart(2, '0')}`;
+    }
+
+    function timerStart() {
+        if (!tRunning) {
+            tRunning = true;
+            tInterval = setInterval(() => {
+                tElapsed += 10;                 // Add 10ms
+                tUpdate(tElapsed);
+            }, 10);                             // Update every 10ms
+        } else {
+            alert('Timer already started');
+        }
+    }
+
+    function timerStop() {
+        if (tRunning) {
+            clearInterval(tInterval);
+            tUpdate(tElapsed);
+            tRunning = false;
+        } else {
+            alert('No timer currently running');
+        }
+    }
+
+    function timerReset() {
+        clearInterval(tInterval);
+        tRunning = false;
+        tElapsed = 0;
+        tStatus.innerHTML = '00:00:00';
+    }
+
+    function timerLap() {
+
+    }
+
+    // ADD LISTENERS
+    document.addEventListener('DOMContentLoaded', () => {
+        tStart.addEventListener('click', timerStart);
+        tStop.addEventListener('click', timerStop);
+        tReset.addEventListener('click', timerReset);
+        tLap.addEventListener('click', timerLap);
+    })
+</script>
 </html>
