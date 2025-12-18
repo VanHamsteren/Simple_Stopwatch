@@ -3,29 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <title>Simple Stopwatch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #020617;
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.25);
+            --danger: #f97373;
+            --success: #4ade80;
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+            --border-subtle: rgba(148, 163, 184, 0.4);
+            --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.75);
+            --radius-lg: 24px;
+            --radius-pill: 999px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text-main);
+            background: radial-gradient(circle at top, var(--bg-gradient-start), var(--bg-gradient-end));
+            padding: 1.5rem;
+        }
+
+        main {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 1.75rem 1.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.75rem;
+        }
+
+        header h1 {
+            font-size: 1.35rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        header span.mode {
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid var(--accent-soft);
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.25), transparent);
+        }
+
+        #status {
+            margin-top: 0.25rem;
+        }
+
+        #timer {
+            font-family: "Orbitron", system-ui, sans-serif;
+            font-size: clamp(2.6rem, 7vw, 3.2rem);
+            letter-spacing: 0.2em;
+            text-align: center;
+            padding: 1rem 1rem 1.1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-subtle);
+            background:
+                    radial-gradient(circle at top, rgba(56, 189, 248, 0.15), transparent),
+                    radial-gradient(circle at bottom, rgba(15, 118, 110, 0.2), transparent),
+                    linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.6));
+            box-shadow:
+                    0 0 0 1px rgba(15, 23, 42, 0.9) inset,
+                    0 18px 35px rgba(15, 23, 42, 0.9);
+            color: #e5f4ff;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+        }
+
+        #controls {
+            display: flex;
+            justify-content: center;
+        }
+
+        #controls > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        button {
+            position: relative;
+            outline: none;
+            min-width: 86px;
+            padding: 0.55rem 0.9rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: var(--text-main);
+            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95));
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            box-shadow:
+                    0 10px 25px rgba(15, 23, 42, 0.95),
+                    0 0 0 1px rgba(15, 23, 42, 0.7) inset;
+            transition:
+                    transform 120ms ease-out,
+                    box-shadow 120ms ease-out,
+                    border-color 120ms ease-out,
+                    background 120ms ease-out;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at top, rgba(248, 250, 252, 0.08), transparent 65%);
+            opacity: 0;
+            transition: opacity 120ms ease-out;
+            pointer-events: none;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    0 16px 32px rgba(15, 23, 42, 0.95),
+                    0 0 0 1px rgba(15, 23, 42, 0.7) inset;
+            border-color: rgba(148, 163, 184, 0.7);
+        }
+
+        button:hover::before {
+            opacity: 1;
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow:
+                    0 8px 18px rgba(15, 23, 42, 0.95),
+                    0 0 0 1px rgba(15, 23, 42, 0.7) inset;
+        }
+
+        #start {
+            background: radial-gradient(circle at top, rgba(34, 197, 94, 0.35), rgba(22, 163, 74, 0.25));
+            border-color: rgba(74, 222, 128, 0.7);
+        }
+
+        #stop {
+            background: radial-gradient(circle at top, rgba(248, 250, 252, 0.1), rgba(15, 23, 42, 0.85));
+        }
+
+        #reset {
+            background: radial-gradient(circle at top, rgba(248, 113, 113, 0.35), rgba(239, 68, 68, 0.25));
+            border-color: rgba(248, 113, 113, 0.75);
+        }
+
+        #lap {
+            background: radial-gradient(circle at top, rgba(56, 189, 248, 0.35), rgba(37, 99, 235, 0.25));
+            border-color: rgba(56, 189, 248, 0.8);
+        }
+
+        #list {
+            border-top: 1px solid rgba(148, 163, 184, 0.35);
+            padding-top: 0.9rem;
+            margin-top: 0.15rem;
+        }
+
+        #list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.35rem;
+        }
+
+        #list-header span.title {
+            font-size: 0.78rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        #list-header span.count {
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+
+        #laps {
+            list-style: none;
+            max-height: 160px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        #laps::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #laps::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.65);
+            border-radius: 999px;
+        }
+
+        #laps li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-family: "Orbitron", system-ui, sans-serif;
+            font-size: 0.82rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            color: #dbeafe;
+        }
+
+        #laps li span.index {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--text-muted);
+        }
+
+        #laps li span.time {
+            letter-spacing: 0.12em;
+        }
+
+        @media (max-width: 480px) {
+            main {
+                padding: 1.4rem 1.35rem 1.1rem;
+                border-radius: 20px;
+            }
+
+            header h1 {
+                font-size: 1.1rem;
+            }
+
+            #timer {
+                font-size: 2.3rem;
+            }
+
+            button {
+                min-width: 80px;
+                font-size: 0.8rem;
+                padding-inline: 0.75rem;
+                cursor: pointer;
+            }
+        }
+    </style>
 </head>
 <body>
-    <main id="main">
-        <header>
-            <h1>Simple Stopwatch</h1>
-        </header>
-        <section id="status">
-            <p id="timer">00:00:00</p>
-        </section>
-        <section id="controls">
-            <div>
-                <button id="start">Start</button>
-                <button id="stop">Stop</button>
-                <button id="reset">Reset</button>
-                <button id="lap">Lap</button>
-            </div>
-        </section>
-        <section id="list">
-            <ol id="laps">
-            </ol>
-        </section>
-    </main>
-</body>
+<main id="main">
+    <header>
+        <h1>Simple Stopwatch</h1>
+        <span class="mode">&copy; <a href="https://github.com/VanHamsteren" target="_blank" style="text-decoration: none; color: var(--text-main); cursor: pointer;">Mavi</a></span>
+    </header>
+
+    <section id="status">
+        <p id="timer">00:00:00</p>
+    </section>
+
+    <section id="controls">
+        <div>
+            <button id="start">Start</button>
+            <button id="stop">Stop</button>
+            <button id="reset">Reset</button>
+            <button id="lap">Lap</button>
+        </div>
+    </section>
+
+    <section id="list">
+        <div id="list-header">
+            <span class="title">Lap times</span>
+            <span class="count" id="lap-count">0 laps</span>
+        </div>
+        <ol id="laps"></ol>
+    </section>
+</main>
+
 <script>
     // GET ELEMENTS
     const tStatus = document.getElementById('timer');
@@ -33,11 +316,14 @@
     const tStop = document.getElementById('stop');
     const tReset = document.getElementById('reset');
     const tLap = document.getElementById('lap');
+    const lapsList = document.getElementById('laps');
+    const lapCountLabel = document.getElementById('lap-count');
 
     // SET VARS
     let tRunning = false;
     let tInterval;
     let tElapsed = 0;
+    let lapIndex = 0;
 
     // TIMER CONTROL
     function tUpdate(ms) {
@@ -51,8 +337,7 @@
             `${String(S).padStart(2, '0')}:` +
             `${String(CS).padStart(2, '0')}`;
 
-        tStatus.innerHTML = tText;
-
+        tStatus.textContent = tText;
         return tText;
     }
 
@@ -60,11 +345,9 @@
         if (!tRunning) {
             tRunning = true;
             tInterval = setInterval(() => {
-                tElapsed += 10;                 // Add 10ms
+                tElapsed += 10;
                 tUpdate(tElapsed);
-            }, 10);                             // Update every 10ms
-        } else {
-            alert('Timer already started');
+            }, 10);
         }
     }
 
@@ -73,8 +356,6 @@
             clearInterval(tInterval);
             tUpdate(tElapsed);
             tRunning = false;
-        } else {
-            alert('No timer currently running');
         }
     }
 
@@ -82,19 +363,38 @@
         clearInterval(tInterval);
         tRunning = false;
         tElapsed = 0;
-        tStatus.innerHTML = '00:00:00';
-        const l = document.getElementById('laps');
-        l.innerHTML = '';
+        lapIndex = 0;
+        tStatus.textContent = '00:00:00';
+        lapsList.innerHTML = '';
+        updateLapCount();
+    }
+
+    function updateLapCount() {
+        lapCountLabel.textContent = lapIndex === 1
+            ? '1 lap'
+            : `${lapIndex} laps`;
     }
 
     function timerLap() {
-        if (tRunning) {
-            const t = tUpdate(tElapsed);
-            const l = document.getElementById('laps');
-            const li = document.createElement('li');
-            li.appendChild(document.createTextNode(t));
-            l.appendChild(li);
-        }
+        if (!tRunning) return;
+
+        const t = tUpdate(tElapsed);
+        lapIndex++;
+
+        const li = document.createElement('li');
+        const indexSpan = document.createElement('span');
+        const timeSpan = document.createElement('span');
+
+        indexSpan.className = 'index';
+        indexSpan.textContent = `Lap ${lapIndex}`;
+        timeSpan.className = 'time';
+        timeSpan.textContent = t;
+
+        li.appendChild(indexSpan);
+        li.appendChild(timeSpan);
+        lapsList.append(li);
+
+        updateLapCount();
     }
 
     // ADD LISTENERS
@@ -103,6 +403,7 @@
         tStop.addEventListener('click', timerStop);
         tReset.addEventListener('click', timerReset);
         tLap.addEventListener('click', timerLap);
-    })
+    });
 </script>
+</body>
 </html>
